@@ -83,10 +83,13 @@
     // Eliminate a possible security hole where the special email address could be printed in the body
     $message_body = str_replace($Parser->extractEmail('to'), "", $message_body);
 
-    // Elgg will auto-load html2text class from our classes plugin dir
-    // Make sure this message body is free of HTML
-    $h2t = new html2text($message_body);
-    $message_body = $h2t->get_text();
+    //// Elgg will auto-load html2text class from our classes plugin dir
+    //// Make sure this message body is free of HTML
+    //$h2t = new html2text($message_body);
+    //$message_body = $h2t->get_text();
+    
+    // Convert new lines, using elgg's filter
+    $message_body = filter_tags($message_body);
 
     list($username, $domain) = explode('@', $Parser->extractEmail('to'));
     list($action_hash, $hash) = explode('+', $username);
