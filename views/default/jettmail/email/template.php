@@ -329,7 +329,7 @@ list($user) = get_user_by_email($to_email);
                                                                         <?php foreach ($notifications as $guid => $entity) { ?>
                                                                             <?php foreach ($entity as $notification) { ?>
                                                                                 <a name="<?= $anchor++ ?>"></a>
-                                                                                <?= $notification->message ?>
+                                                                                <?= elgg_view('output/longtext', array('value' => $notification->message)); ?>
                                                                                 <hr style="color: #C7C7C7;background-color:#C7C7C7;height: 1px;border: 0;">
                                                                                 <div
                                                                                     style="font-size: smaller; text-align: right; color: #C7C7C7;">
