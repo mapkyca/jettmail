@@ -366,7 +366,7 @@ list($user) = get_user_by_email($to_email);
                                                     <p align="left" style="font-size: small;">
                                                         You are receiving this because of your<br>
                                                         <a style="color: #000; font-weight: bold; text-decoration: none;"
-                                                           href="<?php echo $CONFIG->url; ?>settings/user/">notification
+                                                           href="<?php echo $CONFIG->url; ?>notifications/">notification
                                                             preferences</a>
                                                     </p>
 
