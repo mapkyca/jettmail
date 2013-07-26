@@ -95,22 +95,40 @@
     list($action_hash, $hash) = explode('+', $username);
     list($action, $type, $action_guid) = explode('.', $action_hash);
 
-    list($user) = get_user_by_email($Parser->extractEmail('from'));
+    //list($user) = get_user_by_email($Parser->extractEmail('from'));
+    $users = get_user_by_email($Parser->extractEmail('from'));
+    if (($users) && (!is_array($users)))
+        $users = array($users);
+    
+    foreach ($users as $user) {
+    
+        $logged_in = login($user, false);
+        
+        $object = get_entity($action_guid);
+        error_log("JETTMAIL-TERMINAL: Loading $action_guid");
+        
+        if (($object) && (($object->canEdit()) || ($object->canAnnotate()) || ($object->canComment()) || ($object->canWriteToContainer()))) {
+            
+            error_log("JETTMAIL-TERMINAL: Object $action_guid is not editable by {$user->guid}");
+            
+            // Generate new action tokens so elgg won't have a fit
+            set_input('__elgg_token', generate_action_token(time()));
+            set_input('__elgg_ts', time());
 
-    $logged_in = login($user, false);
+            if ($logged_in && is_numeric($action_guid) && $action && $type && $user) {
 
-    // Generate new action tokens so elgg won't have a fit
-    set_input('__elgg_token', generate_action_token(time()));
-    set_input('__elgg_ts', time());
+                elgg_trigger_plugin_hook("email:integration:$action" , $type,
+                    array('attachments' => $attachments
+                    , 'message' => $message_body
+                    , 'guid' => $action_guid
+                    , 'subject' => $subject));
+            }
 
-    if ($logged_in && is_numeric($action_guid) && $action && $type && $user) {
-
-        elgg_trigger_plugin_hook("email:integration:$action" , $type,
-            array('attachments' => $attachments
-            , 'message' => $message_body
-            , 'guid' => $action_guid
-            , 'subject' => $subject));
+        
+        } else {
+            error_log("JETTMAIL-TERMINAL: Object $action_guid is not editable/commentable or annotatable by {$user->guid}");
+        }
+        
+        logout();
+        
     }
-
-    logout();
-
