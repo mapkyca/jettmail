@@ -88,12 +88,19 @@
     //$h2t = new html2text($message_body);
     //$message_body = $h2t->get_text();
     
-    // Convert new lines, using elgg's filter
-    $message_body = filter_tags($message_body);
-
+    
     list($username, $domain) = explode('@', $Parser->extractEmail('to'));
     list($action_hash, $hash) = explode('+', $username);
     list($action, $type, $action_guid) = explode('.', $action_hash);
+    
+    // Convert new lines, using elgg's filter
+    //$message_body = filter_tags($message_body);
+    $message_body = elgg_trigger_plugin_hook('email:messagebody', 'process', array(
+        'action' => $action,
+        'type' => $type,
+        'action_guid' => $action_guid
+    ), filter_tags($message_body));
+
 
     //list($user) = get_user_by_email($Parser->extractEmail('from'));
     $users = get_user_by_email($Parser->extractEmail('from'));
