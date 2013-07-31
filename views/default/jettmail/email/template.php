@@ -329,7 +329,7 @@ list($user) = get_user_by_email($to_email);
                                                                         <?php foreach ($notifications as $guid => $entity) { ?>
                                                                             <?php foreach ($entity as $notification) { ?>
                                                                                 <a name="<?= $anchor++ ?>"></a>
-                                                                                <?= $notification->message ?>
+                                                                                <?= elgg_view('output/longtext', array('value' => $notification->message)); ?>
                                                                                 <hr style="color: #C7C7C7;background-color:#C7C7C7;height: 1px;border: 0;">
                                                                                 <div
                                                                                     style="font-size: smaller; text-align: right; color: #C7C7C7;">
@@ -366,7 +366,7 @@ list($user) = get_user_by_email($to_email);
                                                     <p align="left" style="font-size: small;">
                                                         You are receiving this because of your<br>
                                                         <a style="color: #000; font-weight: bold; text-decoration: none;"
-                                                           href="<?php echo $CONFIG->url; ?>settings/user/">notification
+                                                           href="<?php echo $CONFIG->url; ?>notifications/">notification
                                                             preferences</a>
                                                     </p>
 

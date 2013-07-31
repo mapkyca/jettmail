@@ -83,30 +83,59 @@
     // Eliminate a possible security hole where the special email address could be printed in the body
     $message_body = str_replace($Parser->extractEmail('to'), "", $message_body);
 
-    // Elgg will auto-load html2text class from our classes plugin dir
-    // Make sure this message body is free of HTML
-    $h2t = new html2text($message_body);
-    $message_body = $h2t->get_text();
-
+    //// Elgg will auto-load html2text class from our classes plugin dir
+    //// Make sure this message body is free of HTML
+    //$h2t = new html2text($message_body);
+    //$message_body = $h2t->get_text();
+    
+    
     list($username, $domain) = explode('@', $Parser->extractEmail('to'));
     list($action_hash, $hash) = explode('+', $username);
     list($action, $type, $action_guid) = explode('.', $action_hash);
+    
+    // Convert new lines, using elgg's filter
+    //$message_body = filter_tags($message_body);
+    $message_body = elgg_trigger_plugin_hook('email:messagebody', 'process', array(
+        'action' => $action,
+        'type' => $type,
+        'action_guid' => $action_guid
+    ), filter_tags($message_body));
 
-    list($user) = get_user_by_email($Parser->extractEmail('from'));
 
-    $logged_in = login($user, false);
+    //list($user) = get_user_by_email($Parser->extractEmail('from'));
+    $users = get_user_by_email($Parser->extractEmail('from'));
+    if (($users) && (!is_array($users)))
+        $users = array($users);
+    
+    foreach ($users as $user) {
+    
+        $logged_in = login($user, false);
+        
+        $object = get_entity($action_guid);
+        error_log("JETTMAIL-TERMINAL: Loading $action_guid");
+        
+        if (($object) && (($object->canEdit()) || ($object->canAnnotate()) || ($object->canComment()) || ($object->canWriteToContainer()))) {
+            
+            error_log("JETTMAIL-TERMINAL: Object $action_guid is not editable by {$user->guid}");
+            
+            // Generate new action tokens so elgg won't have a fit
+            set_input('__elgg_token', generate_action_token(time()));
+            set_input('__elgg_ts', time());
 
-    // Generate new action tokens so elgg won't have a fit
-    set_input('__elgg_token', generate_action_token(time()));
-    set_input('__elgg_ts', time());
+            if ($logged_in && is_numeric($action_guid) && $action && $type && $user) {
 
-    if ($logged_in && is_numeric($action_guid) && $action && $type && $user) {
+                elgg_trigger_plugin_hook("email:integration:$action" , $type,
+                    array('attachments' => $attachments
+                    , 'message' => $message_body
+                    , 'guid' => $action_guid
+                    , 'subject' => $subject));
+            }
 
-        elgg_trigger_plugin_hook("email:integration:$action" , $type,
-            array('attachments' => $attachments
-            , 'message' => $message_body
-            , 'guid' => $action_guid));
+        
+        } else {
+            error_log("JETTMAIL-TERMINAL: Object $action_guid is not editable/commentable or annotatable by {$user->guid}");
+        }
+        
+        logout();
+        
     }
-
-    logout();
-
