@@ -82,9 +82,9 @@ class JettMail
 
         $html_body = self::toBase64($message);
 
-        /*$h2t = new html2text($message);
-        $plaintext_body = $h2t->get_text();*/
-        $plaintext_body = filter_tags($message);
+        $h2t = new html2text($message);
+        $plaintext_body = $h2t->get_text();
+        //filter_tags($message);
 
         // Generate a random boundary string
         $mime_boundary = '_x' . sha1((string)time()) . 'x';
@@ -100,7 +100,7 @@ class JettMail
             . $divider
             . self::getHeader()->html . "\r\n"
             . $html_body;
-
+        
         // get the sendmail path from the php ini config settings
         $sendmail_path = trim(ini_get('sendmail_path'));
 
