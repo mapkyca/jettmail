@@ -116,7 +116,7 @@ class JettMail
         } else {*/
 
         // if we can't find a sendmail path then just send email the old fashioned way
-        return mail(null,
+        return mail($to_email,
             $subject,
             $body,
             $headers);
@@ -147,9 +147,9 @@ class JettMail
 
         $headers .= 'From: '
             . $from_name
-            . ' <' . $from_email . '>' . "\r\n"
-            . 'To: ' . $to_email . "\r\n"
-            . 'Subject: ' . $subject . "\r\n";
+            . ' <' . $from_email . '>' . "\r\n";
+//            . 'To: ' . $to_email . "\r\n"
+//            . 'Subject: ' . $subject . "\r\n";
 
         // add header to suppress Outlook auto responses
         $headers .= 'X-Auto-Response-Suppress: ' . 'OOF, DR, RN, NRN' . "\r\n";
